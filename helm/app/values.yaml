@@ -1,0 +1,4 @@
+image:
+  repository: docker.io/seu_usuario/minha-app
+  tag: latest
+

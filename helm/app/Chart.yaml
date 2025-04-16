@@ -1,0 +1,5 @@
+apiVersion: v2
+name: minha-app
+description: Um chart Helm para deploy da aplicação
+version: 0.1.0
+
