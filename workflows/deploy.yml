@@ -1,0 +1,35 @@
+name: CI/CD com Podman e Helm
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Instalar Podman
+      run: |
+        sudo apt update
+        sudo apt install -y podman
+
+    - name: Login no Docker Hub
+      run: podman login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }} docker.io
+
+    - name: Build e push da imagem
+      run: |
+        podman build -t docker.io/${{ secrets.DOCKER_USERNAME }}/minha-app:latest .
+        podman push docker.io/${{ secrets.DOCKER_USERNAME }}/minha-app:latest
+
+    - name: Deploy remoto com Helm via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          helm upgrade --install minha-app ./helm/app --set image.repository=docker.io/${{ secrets.DOCKER_USERNAME }}/minha-app --set image.tag=latest
